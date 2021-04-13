@@ -471,6 +471,7 @@ class Session(nodes.FSCollector):
         )  # type: Dict[Path, str]
 
         self.config.pluginmanager.register(self, name="session")
+        self.collected = False
 
     @classmethod
     def from_config(cls, config: Config) -> "Session":
@@ -801,9 +802,20 @@ class Session(nodes.FSCollector):
     ) -> Iterator[nodes.Item]:
         self.trace("genitems", node)
         if isinstance(node, nodes.Item):
-            node.ihook.pytest_itemcollected(item=node)
-            yield node
+            # wen, for execute single case
+            cur_case =  os.environ.get ("case_name")
+            if cur_case is None:
+                node.ihook.pytest_itemcollected(item=node)
+                yield node
+            else:
+                if cur_case == node.location[2]:
+                    self.collected = True
+                    print ("Collect cur_case = ", cur_case, ", node = ", node.location[2])
+                    node.ihook.pytest_itemcollected(item=node)
+                    yield node
         else:
+            if self.collected == True:
+                return
             assert isinstance(node, nodes.Collector)
             rep = collect_one_node(node)
             if rep.passed:
