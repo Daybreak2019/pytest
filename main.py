@@ -116,7 +116,7 @@ def pytest_addoption(parser: Parser) -> None:
     group._addoption(
         "--continue-on-collection-errors",
         action="store_true",
-        default=False,
+        default=True,
         dest="continue_on_collection_errors",
         help="Force test execution even if collection errors occur.",
     )
@@ -332,6 +332,14 @@ def pytest_runtestloop(session: "Session") -> bool:
 
     if session.config.option.collectonly:
         return True
+
+    # wen: generate all test cases.
+    case_path = os.environ.get ("case_dump")
+    if not case_path is None:  
+        with open(case_path, "w") as File:    
+            for i, item in enumerate(session.items):
+                #print (item.location[2]), function name
+                File.write(item.location[2] + "\n")
 
     for i, item in enumerate(session.items):
         nextitem = session.items[i + 1] if i + 1 < len(session.items) else None
