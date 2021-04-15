@@ -118,6 +118,9 @@ def runtestprotocol(
     hasrequest = hasattr(item, "_request")
     if hasrequest and not item._request:  # type: ignore[attr-defined]
         item._initrequest()  # type: ignore[attr-defined]
+
+    # wen, for run cases
+    os.environ["case_step"] = "setup"
     rep = call_and_report(item, "setup", log)
     reports = [rep]
     if rep.passed:
